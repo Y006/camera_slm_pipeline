@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Virtual env
+.venv/
+.env/
+
+# Data & outputs
+examples/sample_input/*.tmp
+*_masked_r*/
+outputs/
+folder-alias.json
+private-folder-alias.json
+.vscode/settings.json
