@@ -12,7 +12,7 @@
 #   - SAVE_PATH（可选）：相机拍摄结果保存目录；为空则保存到当前工作目录；非空若目录不存在会自动创建。
 #
 # 运行方式：
-#   - 直接执行：python main.py
+#   - 直接执行：python single_shot.py
 #
 # 其他说明：
 #   - 图片保存使用 JPEG（MV_Image_Jpeg）。
@@ -26,14 +26,13 @@ from camera import HikCamera
 from MvImport.MvCameraControl_class import *
 
 # ==== 需要修改的配置 ====
-EXPOSURE_US = 2499233.0                     # 曝光时间（微秒）
-MONITOR_IDX = 2                             # 选择显示器索引（从0开始），如果只有一个显示器则为0
-scale_factor = 1.0                          # 缩放因子，可以修改为 0.5, 1.0 等
-DISPLAY_IMAGE_PATH = r"D:\Lzy\dataset\dogvscat v2\1.png"          # 显示器图片路径（可以为空，如果为空则对应拍摄 psf）
-# DISPLAY_IMAGE_PATH = r""
-SLM_IMAGE_PATH = r"D:\qjy\camera_slm_pipeline\fza_patten_gen_masked_r60\FZA_256_R16.png"        # SLM图片的路径（必须提供）
-IMAGE_NAME = "demo.jpg"        # 拍摄的图像名称
-SAVE_PATH = r"D:\qjy\camera_slm_pipeline\reslt_1010"        # 图片保存路径，如果为空，则默认保存到当前工作目录
+EXPOSURE_US        = 2499233.0  # 曝光时间（微秒）
+MONITOR_IDX        = 2          # 选择显示器索引（从0开始），如果只有一个显示器则为0
+scale_factor       = 1.0        # 缩放因子，可以修改为 0.5, 1.0 等
+DISPLAY_IMAGE_PATH = r"D:\Lzy\dataset\dogvscat v2\1.png"  # 显示器图片路径（可以为空，如果为空则对应拍摄 psf）
+SLM_IMAGE_PATH     = r"D:\qjy\camera_slm_pipeline\fza_patten_gen_masked_r60\FZA_256_R16.png"  # SLM图片的路径（必须提供）
+IMAGE_NAME         = "demo.jpg" # 拍摄的图像名称
+SAVE_PATH          = r"D:\qjy\camera_slm_pipeline\reslt_1010"  # 图片保存路径，如果为空，则默认保存到当前工作目录
 
 # ==== 一般不需要修改的配置 ====
 DEFAULT_SAVE_PATH = os.getcwd()
