@@ -19,6 +19,7 @@
 # =============================================================================
 import os
 import time
+from datetime import datetime
 import threading
 from screen_viewer import Screen
 from slm_ctrl import SLM
@@ -30,9 +31,10 @@ EXPOSURE_US        = 2499233.0  # 曝光时间（微秒）
 MONITOR_IDX        = 2          # 选择显示器索引（从0开始），如果只有一个显示器则为0
 scale_factor       = 1.0        # 缩放因子，可以修改为 0.5, 1.0 等
 DISPLAY_IMAGE_PATH = r"D:\Lzy\dataset\dogvscat v2\1.png"  # 显示器图片路径（可以为空，如果为空则对应拍摄 psf）
-SLM_IMAGE_PATH     = r"D:\qjy\camera_slm_pipeline\fza_patten_gen_masked_r60\FZA_256_R16.png"  # SLM图片的路径（必须提供）
-IMAGE_NAME         = "demo.jpg" # 拍摄的图像名称
-SAVE_PATH          = r"D:\qjy\camera_slm_pipeline\reslt_1010"  # 图片保存路径，如果为空，则默认保存到当前工作目录
+# DISPLAY_IMAGE_PATH = r""      # 拍摄 psf
+SLM_IMAGE_PATH     = r"D:\qjy\camera_slm_pipeline\fza_patten_gen_masked_r30\FZA_256_R15.png"  # SLM图片的路径（必须提供）
+IMAGE_NAME         = "m-oled"   # 拍摄的图像名称
+SAVE_PATH          = r"D:\qjy\camera_slm_pipeline"  # 图片保存路径，如果为空，则默认保存到当前工作目录
 
 # ==== 一般不需要修改的配置 ====
 DEFAULT_SAVE_PATH = os.getcwd()
@@ -98,23 +100,23 @@ def main():
                 continue
 
             # 拍摄图像并保存
-            out_path = os.path.join(SAVE_PATH, IMAGE_NAME)
-            os.makedirs(SAVE_PATH, exist_ok=True)
+            current_date = datetime.now().strftime("%m%d")  # 获取当前日期，格式为 MMDD
+            current_time = datetime.now().strftime("%H%M")  # 获取当前时间，格式为 HHMM
+            out_path = os.path.join(SAVE_PATH, f"result_{current_date}", f"{IMAGE_NAME}-{current_time}.jpg")
+
+            os.makedirs(os.path.dirname(out_path), exist_ok=True)
             ok = cam.snap(out_path, exposure_us=EXPOSURE_US, timeout_ms=TIMEOUT_MS, img_type=MV_Image_Jpeg)
 
             if ok:
                 print(f"[OK] 拍摄成功，保存路径 -> {out_path}")
             else:
-                print(f"[ERR] 拍摄失败，保存路径 -> {out_path}")
+                print(f"[ERR] 拍摄失败！")
 
             break
 
     finally:
         if cam is not None:
             cam.close()
-            print("[INFO] 相机已关闭")
-
-        print("\n[DONE] 任务完成!\n\n")
 
 if __name__ == "__main__":
     main()
