@@ -20,3 +20,12 @@ outputs/
 folder-alias.json
 private-folder-alias.json
 .vscode/settings.json
+fza_patten_gen/*.png
+fza_patten_gen_masked_r*/*.png
+*.jpg
+*.jpeg
+*.tif   
+*.tiff
+*.bmp
+*.png
+!分辨率测试卡.JPG

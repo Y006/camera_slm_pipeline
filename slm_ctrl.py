@@ -73,4 +73,7 @@ class SLM:
 if __name__ == "__main__":
     slm = SLM(verbose=True)
     slm.init()
-    slm.img_show("test.png")   # 替换为实际图片路径
+   
+    import time
+    slm.img_show(r"D:\qjy\camera_slm_pipeline\fza_patten_gen_masked_r60\FZA_256_R16.png")   # 替换为实际图片路径
+    time.sleep(1000)  # 暂停60秒

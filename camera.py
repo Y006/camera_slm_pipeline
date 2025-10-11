@@ -159,7 +159,7 @@ if __name__ == "__main__":
     try:
         if not cam.open():
             sys.exit(1)
-        ok = cam.snap("capture.jpg", exposure_us=20000.0, timeout_ms=2000, img_type=MV_Image_Jpeg)
+        ok = cam.snap("capture.jpg", exposure_us=500000.0, timeout_ms=2000, img_type=MV_Image_Jpeg)
         if not ok:
             print("[ERR] 抓拍失败")
     finally:
