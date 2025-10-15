@@ -1,121 +1,119 @@
-# =============================================================================
-# 脚本用途与用法（请先阅读）
-# -----------------------------------------------------------------------------
-# 功能：
-#   - 拍摄一张测量值：  「显示器显示图片→SLM显示掩膜→相机拍摄图片→保存图片到磁盘」
-#   - 拍摄一张 PSF：    「SLM显示掩膜→相机拍摄图片→保存图片到磁盘」
-#
-# 需要设置的变量（见“需要修改的配置”区）：
-#   - SLM_IMAGE_PATH（必填）：SLM 要显示的图片路径；路径必须存在，否则跳过本轮并报错。
-#   - IMAGE_NAME（必填）：拍摄结果文件名（例如 "mea3.jpg"）；为空将报错并跳过本轮。
-#   - DISPLAY_IMAGE_PATH（可选）：显示器要显示的图片路径；为空则会跳过显示器步骤，对应为拍摄 PSF。
-#   - SAVE_PATH（可选）：相机拍摄结果保存目录；为空则保存到当前工作目录；非空若目录不存在会自动创建。
-#
-# 运行方式：
-#   - 直接执行：python single_shot.py
-#
-# 其他说明：
-#   - 图片保存使用 JPEG（MV_Image_Jpeg）。
-# =============================================================================
 import os
 import time
-from datetime import datetime
+import yaml
 import threading
-from src.screen_viewer import Screen
+from src.screen_viewer import display_image
 from src.slm_ctrl import SLM
 from src.camera import HikCamera
 from MvImport.MvCameraControl_class import *
-
-# ==== 需要修改的配置 ====
-EXPOSURE_US        = 406892.0  # 曝光时间（微秒）2406892,2206892,fza_patten_gen_masked_r40\FZA_256_R15.png
-MONITOR_IDX        = 2          # 选择显示器索引（从0开始），如果只有一个显示器则为0
-scale_factor       = 0.4        # 缩放因子，可以修改为 0.5, 1.0 等
-# DISPLAY_IMAGE_PATH = r"D:\Lzy\dataset\dogvscat v2\1.png"  # 显示器图片路径（可以为空，如果为空则对应拍摄 psf）
-DISPLAY_IMAGE_PATH = r"D:\qjy\camera_slm_pipeline\data\example\分辨率测试卡.JPG"
-SLM_IMAGE_PATH     = r"D:\qjy\camera_slm_pipeline\data\fza_bin_gen_masked_r40\FZA_bin_R20.png"  # SLM图片的路径（必须提供）
-IMAGE_NAME         = "m-binr20"   # 拍摄的图像名称
-SAVE_PATH          = r"D:\qjy\camera_slm_pipeline\output"  # 图片保存路径，如果为空，则默认保存到当前工作目录
-
-# ==== 一般不需要修改的配置 ====
-DEFAULT_SAVE_PATH = os.getcwd()
-TIMEOUT_MS  = 3000            # 相机超时时间（毫秒）
-SETTLE_MS   = 30             # 等待稳定（毫秒）
-
-# ==== 初始化 ====
-slm = SLM(verbose=True)
-cam = HikCamera(dev_index=0)
-
-def display_image():
-    """在新线程中显示图片，保持显示器持续显示"""
-    try:
-        # 创建 Screen 对象，选择第一个显示器（默认选择第一个显示器）
-        scr = Screen(monitor_index=MONITOR_IDX, bg="black")
-        
-        # 显示图像（请确保图像路径正确）
-        if not os.path.exists(DISPLAY_IMAGE_PATH):
-            print("[ERR] 显示器图片路径无效")
-            return
-        
-        scr.show_image(DISPLAY_IMAGE_PATH, scale_factor)
-        scr.start()  # 启动 Tkinter 事件循环
-    except Exception as e:
-        print(f"[ERROR] 显示图像时出错: {e}")
+import time, threading, datetime
+from utils.config_utils import (
+    prepare_run_environment, task_codes_from_time,
+    append_log, write_run_yaml, to_json_str, generate_file_prefix
+)
 
 def main():
+    
+    CONFIG_PATH = r"D:/qjy/camera_slm_pipeline/config.yaml"  # 可替换为实际路径
+    config, run_data, run_path, proj_dir, kind = prepare_run_environment(CONFIG_PATH)
+
+    if config["task"]["mode"] == "capture_psf":
+        use_display = False
+        use_slm     = True
+        use_camera  = True
+    if config["task"]["mode"] == "capture_measurement":
+        use_display = True
+        use_slm     = True
+        use_camera  = True
+    if config["task"]["mode"] == "calibration":
+        use_display = True
+        use_slm     = False
+        use_camera  = False
+
     try:
-        # 初始化 SLM 和相机
-        slm.init()
-        if not cam.open():
-            print("[ERR] 相机打开失败")
-            exit(2)
+    # 初始化设备
+        if use_slm:    
+            slm = SLM(verbose=True)
+            settle_ms = 30
+            slm.init()
 
-        # 如果保存路径为空，则使用默认的当前目录
-        if SAVE_PATH.strip() == "":
-            save_path = DEFAULT_SAVE_PATH
-        else:
-            save_path = SAVE_PATH
-            # 检查路径是否存在，不存在则创建
-            if not os.path.exists(save_path):
-                print(f"[INFO] 保存路径不存在，正在创建：{save_path}")
-                os.makedirs(save_path)
+        if use_camera:
+            cam = HikCamera(dev_index=0)
+            timeout_ms = 3000
+            if not cam.open():
+                print("[ERR] 相机打开失败")
+                exit(2)
+    
+    # 生成任务 ID
+        code4, task_id = task_codes_from_time(kind, k=4)
 
-        # 在新线程中开始显示图片
-        display_thread = threading.Thread(target=display_image)
-        display_thread.daemon = True  # 使线程在主程序退出时结束
-        display_thread.start()
+    # 运行设备
+        if use_display:
+            print("[INFO] 启动显示器显示线程")
+            display_thread = threading.Thread(
+                target=display_image,
+                args=(
+                    config["capture_settings"]["display_image_path"],
+                    config["capture_settings"]["monitor_idx"],
+                    config["capture_settings"]["scale_factor"]
+                    # 目前这里的函数设置没有添加 config["capture_settings"]["display_position"]
+                )
+            )
+            display_thread.daemon = True
+            display_thread.start()
 
-        while True:
-            # 如果SLM图片路径为空，则打印错误并跳过
-            if not os.path.exists(SLM_IMAGE_PATH):
+        if use_slm:
+            if not os.path.exists(config["capture_settings"]["slm_image_path"]):
                 print("[ERR] SLM图片路径无效")
-                continue
+                exit(4)
+            slm.img_show(config["capture_settings"]["slm_image_path"])
+            time.sleep(settle_ms / 1000.0)
 
-            # 在SLM上显示图片
-            slm.img_show(SLM_IMAGE_PATH)
-            time.sleep(SETTLE_MS / 1000.0)  # 等待稳定
+        if config["task"]["mode"] == "calibration":
+            print("[INFO] 进入标定模式，保持显示器和SLM显示，按 Ctrl+C 退出或等待1000秒后自动退出")
+            print("[INFO] calibration 模式：不写 run.yaml 日志")
+            time.sleep(10000)   # 保持足够时间用于手动对焦等操作
+            return
 
-            # 如果没有拍摄图像名称，打印错误
-            if not IMAGE_NAME:
-                print("[ERR] 拍摄图像名称未提供")
-                continue
-
-            # 拍摄图像并保存
-            current_date = datetime.now().strftime("%m%d")  # 获取当前日期，格式为 MMDD
-            current_time = datetime.now().strftime("%H%M")  # 获取当前时间，格式为 HHMM
-            out_path = os.path.join(SAVE_PATH, f"result_{current_date}", f"{IMAGE_NAME}-{current_time}.jpg")
-
-            os.makedirs(os.path.dirname(out_path), exist_ok=True)
-            ok = cam.snap(out_path, exposure_us=EXPOSURE_US, timeout_ms=TIMEOUT_MS, img_type=MV_Image_Jpeg)
-
+        captured = None
+        if use_camera and kind in ("psf", "m"):
+            num_width = 3   # 保存图片的编号位数
+            file_prefix = generate_file_prefix(kind, run_data, num_width)
+            out_path = proj_dir / f"{file_prefix}-{code4}.jpg"
+            ok = cam.snap(
+                out_path,
+                exposure_us=config["capture_settings"]["exposure_us"],
+                timeout_ms=timeout_ms,
+                img_type=MV_Image_Jpeg
+            )
             if ok:
-                print(f"[OK] 拍摄成功，保存路径 -> {out_path}")
+                captured = str(out_path)
+                if config["task"]["mode"] == "capture_psf":
+                    print(f"[OK] PSF 拍摄成功!")
+                if config["task"]["mode"] == "capture_measurement":
+                    print(f"[OK] Measurement 拍摄成功!")
             else:
-                print(f"[ERR] 拍摄失败！")
-
-            break
+                print("[ERR] 拍摄失败！")
+    
+    # 写入 run.yaml
+        entry_key = f"task_{code4}"
+        entry_val = {
+            "task_id": task_id,
+            "task_time": datetime.datetime.now().astimezone().isoformat(timespec='seconds'),
+            "mode": config["task"]["mode"],
+            "description": config["task"].get("description", ""),
+            "capture_settings": to_json_str(config["capture_settings"]),
+            "physical_setup": to_json_str(config["physical_setup"])
+        }
+        if captured:
+            if kind == "psf": entry_val["psf_path"] = captured
+            else: entry_val["measurement_path"] = captured
+        append_log(run_data, {entry_key: entry_val})
+        write_run_yaml(run_path, run_data)
+        print(f"[OK] wrote {run_path}")
 
     finally:
-        if cam is not None:
+        if use_camera:
             cam.close()
 
 if __name__ == "__main__":
