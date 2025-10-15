@@ -1,0 +1,31 @@
+schema_version: 1.0
+
+project:
+  root_dir: "./output1014"
+
+experiment_id:
+  enable_auto: true
+  format: "exp{seq:03d}-{date}-{hash}"
+  date_fmt: "%m%d"
+  seq_width: 3
+  hash_len: 6
+  reset: "daily"
+
+logging:
+  save_config_copy: true
+
+# ==== 无透镜成像系统配置 ====
+imaging_config:
+  exposure_us: 599233.0000
+  monitor_idx: 2
+  scale_factor: 0.4
+  display_image_path: "D:/qjy/camera_slm_pipeline/data/example/分辨率测试卡.jpg"
+  slm_image_path: "D:/qjy/camera_slm_pipeline/data/fza_bin_gen/FZA_bin_R25.png"
+
+# ==== 任务定义：运行模式选择 ====
+task:
+  mode: "capture_measurement"   # 可选: calibration | capture_psf | capture_measurement
+  repeat: 1                     # 拍摄次数
+
+# 任务备注：
+# 30cm处放置一张超大的USAF照片

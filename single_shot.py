@@ -21,20 +21,20 @@ import os
 import time
 from datetime import datetime
 import threading
-from screen_viewer import Screen
-from slm_ctrl import SLM
-from camera import HikCamera
+from src.screen_viewer import Screen
+from src.slm_ctrl import SLM
+from src.camera import HikCamera
 from MvImport.MvCameraControl_class import *
 
 # ==== 需要修改的配置 ====
-EXPOSURE_US        = 2499233.0  # 曝光时间（微秒）
+EXPOSURE_US        = 406892.0  # 曝光时间（微秒）2406892,2206892,fza_patten_gen_masked_r40\FZA_256_R15.png
 MONITOR_IDX        = 2          # 选择显示器索引（从0开始），如果只有一个显示器则为0
-scale_factor       = 1.0        # 缩放因子，可以修改为 0.5, 1.0 等
-DISPLAY_IMAGE_PATH = r"D:\Lzy\dataset\dogvscat v2\1.png"  # 显示器图片路径（可以为空，如果为空则对应拍摄 psf）
-# DISPLAY_IMAGE_PATH = r""      # 拍摄 psf
-SLM_IMAGE_PATH     = r"D:\qjy\camera_slm_pipeline\fza_patten_gen_masked_r30\FZA_256_R15.png"  # SLM图片的路径（必须提供）
-IMAGE_NAME         = "m-oled"   # 拍摄的图像名称
-SAVE_PATH          = r"D:\qjy\camera_slm_pipeline"  # 图片保存路径，如果为空，则默认保存到当前工作目录
+scale_factor       = 0.4        # 缩放因子，可以修改为 0.5, 1.0 等
+# DISPLAY_IMAGE_PATH = r"D:\Lzy\dataset\dogvscat v2\1.png"  # 显示器图片路径（可以为空，如果为空则对应拍摄 psf）
+DISPLAY_IMAGE_PATH = r"D:\qjy\camera_slm_pipeline\data\example\分辨率测试卡.JPG"
+SLM_IMAGE_PATH     = r"D:\qjy\camera_slm_pipeline\data\fza_bin_gen_masked_r40\FZA_bin_R20.png"  # SLM图片的路径（必须提供）
+IMAGE_NAME         = "m-binr20"   # 拍摄的图像名称
+SAVE_PATH          = r"D:\qjy\camera_slm_pipeline\output"  # 图片保存路径，如果为空，则默认保存到当前工作目录
 
 # ==== 一般不需要修改的配置 ====
 DEFAULT_SAVE_PATH = os.getcwd()

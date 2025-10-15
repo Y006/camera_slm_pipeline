@@ -1,6 +1,7 @@
 import numpy as np
 from PIL import Image
 import torch
+import os
 
 # 自动设备选择
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -58,13 +59,22 @@ def process_one_pair(psf_path, blur_path, delta=80000, output_path="Test_Wiener.
 # ========== 示例运行 ==========
 
 if __name__ == '__main__':
-    psf_path = r'D:\MVS\Data\20250629\Image_20251010231727404.png'
-    blur_path = r'D:\qjy\camera_slm_pipeline\reslt_1010\measure10102320-3.jpg'
-    output_path = r'D:\qjy\camera_slm_pipeline\reslt_1010\Test_Wiener_10000-3.png'
+    psf_path = r'D:\qjy\camera_slm_pipeline\output\exp020-1013-99c180\Image_20251013211130508.png'
+    blur_path = r'D:\qjy\camera_slm_pipeline\output\exp020-1013-99c180\Image_20251013211809704.png'
+    output_path = r'D:\qjy\camera_slm_pipeline\output\exp020-1013-99c180\Image_r.jpg'
+
+    # folder_path = os.path.dirname(psf_path)
+    # blur_filename = os.path.basename(blur_path) # 获取文件名，如 "m-lcd-1234.jpg"
+    # lcd_part = blur_filename.split('-')[1] # 获取 "lcd"
+    # psf_time = int(psf_path.split('-')[-1].split('.')[0]) # 取 psf 文件名中的四位数字
+    # blur_time = int(blur_path.split('-')[-1].split('.')[0]) # 取 blur 文件名中的四位数字
+    # time_part = max(psf_time, blur_time)
+    # output_path = os.path.join(folder_path,f'r-{lcd_part}-{time_part:04d}.png')
+
     process_one_pair(
         psf_path=psf_path,
         blur_path=blur_path,
-        delta=1000000,
+        delta=100000000,
         output_path=output_path
     )
     print("Completed！")

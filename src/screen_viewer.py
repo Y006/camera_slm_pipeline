@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 from PIL.Image import Resampling
 from screeninfo import get_monitors
 import time
+import os
 
 class Screen:
     def __init__(self, monitor_index: int = 0, bg: str = "black"):
@@ -119,33 +120,50 @@ class Screen:
         except Exception:
             pass
 
+def display_image(display_image_path, monitor_idx, scale_factor):
+    """在新线程中显示图片，保持显示器持续显示"""
+    try:
+        # 创建 Screen 对象，选择第一个显示器（默认选择第一个显示器）
+        scr = Screen(monitor_index=monitor_idx, bg="black")
+        
+        # 显示图像（请确保图像路径正确）
+        if not os.path.exists(display_image_path):
+            print("[ERR] 显示器图片路径无效")
+            exit(3)
+        
+        scr.show_image(display_image_path, scale_factor)
+        scr.start()  # 启动 Tkinter 事件循环
+    except Exception as e:
+        print(f"[ERROR] 显示图像时出错: {e}")
+
+
 def main():
     screen = Screen(monitor_index=2, bg="black")
 
-    img_path1 = r"D:\Lzy\dataset\dogvscat v2\0.png"
-    scale_factor = 1.0
+    img_path1 = r"D:\qjy\camera_slm_pipeline\data\example\分辨率测试卡.JPG"
+    scale_factor = 0.1
     success = screen.show_image(img_path1, scale_factor)
     if success:
         screen.root.update()  # 强制刷新窗口
         print("[INFO] 第一张图像已显示，开始事件循环...")
-        time.sleep(5)
+        # time.sleep(50000)
     else:
         print("[ERROR] 显示第一张图像失败")
 
-    img_path2 = r"D:\Lzy\dataset\dogvscat v2\1.png"
-    success = screen.show_image(img_path2, scale_factor)
-    if success:
-        screen.root.update()
-        print("[INFO] 第二张图像已显示，开始事件循环...")
-        time.sleep(5)
-    else:
-        print("[ERROR] 显示第二张图像失败")
+    # img_path2 = r"D:\Lzy\dataset\dogvscat v2\1.png"
+    # success = screen.show_image(img_path2, scale_factor)
+    # if success:
+    #     screen.root.update()
+    #     print("[INFO] 第二张图像已显示，开始事件循环...")
+    #     time.sleep(5)
+    # else:
+    #     print("[ERROR] 显示第二张图像失败")
 
-    scale_factor = 0.2
+    # scale_factor = 0.2
 
     # 在新的位置显示第三张图像
-    img_path3 = r"D:\qjy\camera_slm_pipeline\pic_example\分辨率测试卡.JPG"
-    position = (1500, 500)  # 指定第三张图片显示的位置 (x, y)
+    img_path3 = r"D:\qjy\camera_slm_pipeline\data\example\分辨率测试卡.JPG"
+    position = (1500, 700)  # 指定第三张图片显示的位置 (x, y)
     success = screen.show_image_at(img_path3, position, scale_factor)
 
     if success:

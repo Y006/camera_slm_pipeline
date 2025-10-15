@@ -75,5 +75,5 @@ if __name__ == "__main__":
     slm.init()
    
     import time
-    slm.img_show(r"D:\qjy\camera_slm_pipeline\fza_patten_gen_masked_r60\FZA_256_R16.png")   # 替换为实际图片路径
+    slm.img_show(r"D:\qjy\camera_slm_pipeline\data\fza_bin_gen_masked_r40\FZA_bin_R15.png")   # 替换为实际图片路径
     time.sleep(1000)  # 暂停60秒

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ========= 参数区：按需修改 =========
-FOLDER = r"D:\qjy\camera_slm_pipeline\fza_patten_gen"  # 输入图片文件夹路径
-RADIUS = 100                      # 圆半径（像素）
+FOLDER = r"D:\qjy\camera_slm_pipeline\data\fza_bin_gen"  # 输入图片文件夹路径
+RADIUS = 40                      # 圆半径（像素）
 # 若想自定义圆心，设置为 (x, y) 像素坐标；为 None 则使用图片中心
 CENTER = None
 # 圆外填充值：黑色为 0

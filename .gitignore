@@ -29,3 +29,8 @@ fza_patten_gen_masked_r*/*.png
 *.bmp
 *.png
 !分辨率测试卡.JPG
+.counter.json
+
+# 忽略整个 output 目录及其所有内容
+/output/
+/output1014/
